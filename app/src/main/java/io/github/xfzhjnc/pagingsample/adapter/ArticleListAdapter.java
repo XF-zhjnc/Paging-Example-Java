@@ -5,19 +5,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
+import androidx.paging.PagedListAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
-import io.github.xfzhjnc.pagingsample.database.ArticleEntity;
 import io.github.xfzhjnc.pagingsample.R;
+import io.github.xfzhjnc.pagingsample.database.ArticleEntity;
 
-public class ArticleListAdapter extends RecyclerView.Adapter<ArticleListAdapter.ArticleListViewHolder> {
-    private       List<ArticleEntity>          mEntityList;
+public class ArticleListAdapter extends PagedListAdapter<ArticleEntity, ArticleListAdapter.ArticleListViewHolder> {
     private final ArticleListItemClickListener mOnItemClickListener;
 
     public ArticleListAdapter(ArticleListItemClickListener onItemClickListener) {
+        super(new DiffUtil.ItemCallback<ArticleEntity>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull ArticleEntity oldItem, @NonNull ArticleEntity newItem) {
+                return oldItem.getId().equals(newItem.getId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull ArticleEntity oldItem, @NonNull ArticleEntity newItem) {
+                return oldItem.getId().equals(newItem.getId()) && oldItem.getDesc().equals(newItem.getDesc());
+            }
+        });
         mOnItemClickListener = onItemClickListener;
     }
 
@@ -30,47 +39,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<ArticleListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ArticleListViewHolder holder, int position) {
-        holder.bind(mEntityList.get(position));
-    }
-
-    @Override
-    public int getItemCount() {
-        if (null == mEntityList) return 0;
-        return mEntityList.size();
-    }
-
-    public void swapArticleList(final List<ArticleEntity> articleEntities) {
-        if (mEntityList == null) {
-            mEntityList = articleEntities;
-            notifyDataSetChanged();
-        } else {
-            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-                @Override
-                public int getOldListSize() {
-                    return mEntityList.size();
-                }
-
-                @Override
-                public int getNewListSize() {
-                    return articleEntities.size();
-                }
-
-                @Override
-                public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return mEntityList.get(oldItemPosition).getId().equals(articleEntities.get(newItemPosition).getId());
-                }
-
-                @Override
-                public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                    ArticleEntity oldEntity = mEntityList.get(oldItemPosition);
-                    ArticleEntity newEntity = articleEntities.get(newItemPosition);
-                    return oldEntity.getId().equals(newEntity.getId())
-                            && oldEntity.getDesc().equals(newEntity.getDesc());
-                }
-            });
-            mEntityList = articleEntities;
-            result.dispatchUpdatesTo(this);
-        }
+        holder.bind(getItem(position));
     }
 
     public interface ArticleListItemClickListener {
@@ -99,7 +68,7 @@ public class ArticleListAdapter extends RecyclerView.Adapter<ArticleListAdapter.
         @Override
         public void onClick(View view) {
             int    position = getAdapterPosition();
-            String id       = mEntityList.get(position).getId();
+            String id       = getItem(position).getId();
             mOnItemClickListener.onArticleItemClick(id);
         }
     }

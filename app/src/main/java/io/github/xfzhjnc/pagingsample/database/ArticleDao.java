@@ -1,6 +1,7 @@
 package io.github.xfzhjnc.pagingsample.database;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -12,7 +13,7 @@ public interface ArticleDao {
     void bulkInsert(ArticleEntity... entities);
 
     @Query("SELECT * FROM articles ORDER BY `index` ASC")
-    LiveData<ArticleEntity[]> getArticles();
+    DataSource.Factory<Integer, ArticleEntity> getArticles();
 
     @Query("SELECT * FROM articles WHERE id = :id")
     LiveData<ArticleEntity> getArticleById(String id);

@@ -37,9 +37,7 @@ public class MainActivity extends AppCompatActivity
         // set data
         ArticleViewModelFactory factory = new ArticleViewModelFactory(InjectorUtils.provideGankRepository(this));
         ArticleViewModel articleViewModel = ViewModelProviders.of(this, factory).get(ArticleViewModel.class);
-        articleViewModel.getArticleEntities().observe(this, articleEntities -> {
-            adapter.swapArticleList(Arrays.asList(articleEntities));
-        });
+        articleViewModel.getArticleEntities().observe(this, adapter::submitList);
         // =============================
     }
 
